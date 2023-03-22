@@ -25,6 +25,9 @@ class MainActivity : AppCompatActivity() {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
 
+        val converter = GeoPointConverter()
+        val point = converter.convert(lon = 127.1296, lat = 37.5943)
+        Log.e("converter", "${point.nx}, ${point.ny}")
         val service = retrofit.create(WeatherService::class.java)
         service.getVillageForecast(
             base_date = BaseDateTime.getBaseDateTime().baseData.toInt(),//20230321,
@@ -32,8 +35,8 @@ class MainActivity : AppCompatActivity() {
             page_no = 1,
             num_of_rows = 400,
             base_time =  BaseDateTime.getBaseDateTime().baseTime,
-            nx = "55",
-            ny = "127"
+            nx = point.nx.toString(),
+            ny = point.ny.toString()
         ).enqueue(object : Callback<WeatherEntity>{
             override fun onFailure(call: Call<WeatherEntity>, t: Throwable) {
                 t.printStackTrace()
