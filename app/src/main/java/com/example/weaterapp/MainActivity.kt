@@ -27,11 +27,11 @@ class MainActivity : AppCompatActivity() {
 
         val service = retrofit.create(WeatherService::class.java)
         service.getVillageForecast(
-            base_date = 20230321,
+            base_date = BaseDateTime.getBaseDateTime().baseData.toInt(),//20230321,
             data_type = "json",
             page_no = 1,
             num_of_rows = 400,
-            base_time =  "0500",
+            base_time =  BaseDateTime.getBaseDateTime().baseTime,
             nx = "55",
             ny = "127"
         ).enqueue(object : Callback<WeatherEntity>{
