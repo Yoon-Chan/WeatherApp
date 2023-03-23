@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
             }.start()
 
 
-            Log.e("lastLocation", it.toString())
+            //Log.e("lastLocation", it.toString())
 
             val gson: Gson = GsonBuilder()
                 .setLenient()
@@ -105,9 +105,9 @@ class MainActivity : AppCompatActivity() {
                 .build()
 
             val converter = GeoPointConverter()
-            Log.e("lastLocation", "${it.latitude},${it.longitude}")
+            //Log.e("lastLocation", "${it.latitude},${it.longitude}")
             val point = converter.convert(lon = it.longitude, lat = it.latitude)
-            Log.e("converter", "${point.nx}, ${point.ny}")
+            //Log.e("converter", "${point.nx}, ${point.ny}")
             val service = retrofit.create(WeatherService::class.java)
             service.getVillageForecast(
                 base_date = BaseDateTime.getBaseDateTime().baseData.toInt(),//20230321,
