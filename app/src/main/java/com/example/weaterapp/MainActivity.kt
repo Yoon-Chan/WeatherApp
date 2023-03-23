@@ -3,6 +3,7 @@ package com.example.weaterapp
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -12,15 +13,19 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import com.example.weaterapp.databinding.ActivityMainBinding
+import com.example.weaterapp.databinding.ItemForecastBinding
 import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
+import java.util.*
+import kotlin.Comparator
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var binding : ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -72,6 +77,22 @@ class MainActivity : AppCompatActivity() {
 
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         fusedLocationClient.lastLocation.addOnSuccessListener {
+            Thread {
+                try {
+                    val addresslist = Geocoder(this, Locale.KOREA).getFromLocation(
+                        it.latitude,
+                        it.longitude,
+                        1
+                    )
+                    runOnUiThread {
+                        binding.locationTextView.text = addresslist?.get(0)?.thoroughfare.orEmpty()
+                    }
+                }catch (e : IOException){
+                    e.printStackTrace()
+                }
+            }.start()
+
+
             Log.e("lastLocation", it.toString())
 
             val gson: Gson = GsonBuilder()
@@ -139,9 +160,27 @@ class MainActivity : AppCompatActivity() {
                     })
 
                     val currentForecast = list.first()
-                    binding.temperaturTextView.text = getString(R.string.temperature_text, currentForecast.temperature)
+                    binding.temperaturTextView.text =
+                        getString(R.string.temperature_text, currentForecast.temperature)
                     binding.skyTextView.text = currentForecast.weather
-                    binding.precipitationTextView.text = getString(R.string.precipitation_text, currentForecast.precipitation)
+                    binding.precipitationTextView.text =
+                        getString(R.string.precipitation_text, currentForecast.precipitation)
+
+                    binding.childForecastLayout.apply {
+                        list.forEachIndexed { index, forecast ->
+                            if (index == 0) {
+                                return@forEachIndexed
+                            }
+
+                            val itemView = ItemForecastBinding.inflate(layoutInflater)
+                            itemView.timeTextView.text = forecast.forecastTime
+                            itemView.weatherTextView.text = forecast.weather
+                            itemView.temperatureTextView.text =
+                                getString(R.string.temperature_text, forecast.temperature)
+
+                            addView(itemView.root)
+                        }
+                    }
                     //Log.e("Forecast", forecastDateTimeMap.toString())
                 }
             })
